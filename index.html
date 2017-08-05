@@ -1,0 +1,40 @@
+<html>
+<head></head>
+<body>
+<h2>Video Info</h2>
+<form>
+  <div>
+    <label>Select a Video File</lable>
+    </div>
+    <input type="file" accept="video/*" />
+    <button type="submit">Get Info</button>
+    <h1 id="result"></h1>
+</form>
+<script>
+//electron combines power of both node environment(CommonJS) and NormalBrowser
+//so we can use require() inside a elctron app
+//we will use it to load file/ffmpeg etc
+//for that we have to use IPC to communicate wit `app` module to communicate with cli
+//and get the info from ffmpeg and then some how transfer it ti index.js
+const electron = require('electron');
+//is responsible for actual IPC it helps us to communicate wit window and
+//other parts of our app
+const {ipcRenderer} = electron;
+
+
+document.querySelector('form').addEventListener('submit',(event)=>{
+  event.preventDefault();
+  console.log('File Loaded');
+  const file = document.querySelector('input').files[0];
+  //first we send some info to index.js and the only parameter ffmpeg need is path
+  const {path} = file;
+  //just like android we make custom eventslisteners
+  ipcRenderer.send('video:submit', path);
+
+  });
+
+ipcRenderer.on('video:metadata',(event,duration)=>{
+  document.querySelector('#result').innerHTML=duration;
+});
+</script>
+</body>
